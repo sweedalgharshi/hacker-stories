@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 // import { Fragment } from 'react';
 
 const App = () => {
@@ -58,9 +58,11 @@ const App = () => {
         id={'search'}
         type={'text'}
         onInputChange={handleSearch}
+        isFocused
         value={searchTerm}
-        label={'Search'}
-      />
+      >
+        <strong>Search :</strong>
+      </InputWithLabel>
       <hr />
       <List list={searchedStories} />
       {/* render the list here */}
@@ -111,11 +113,33 @@ const Item = ({ item }) => {
 //   );
 // };
 
-const InputWithLabel = ({ id, label, value, onInputChange, type }) => {
+const InputWithLabel = ({
+  id,
+  value,
+  onInputChange,
+  type,
+  isFocused,
+  children,
+}) => {
+  const inputRef = useRef();
+
+  useEffect(() => {
+    if (isFocused && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isFocused]);
+
   return (
     <>
-      <label htmlFor={id}>{label}</label>
-      <input type={type} id={id} value={value} onChange={onInputChange} />
+      <label htmlFor={id}>{children}</label>
+      &nbsp;
+      <input
+        type={type}
+        id={id}
+        value={value}
+        onChange={onInputChange}
+        ref={inputRef}
+      />
     </>
   );
 };
