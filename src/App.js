@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
+// import { Fragment } from 'react';
 
 const App = () => {
   //you can do something in between
@@ -53,7 +54,13 @@ const App = () => {
       <h1>My Hacker Stories</h1>
 
       {/* B*/}
-      <Search onSearch={handleSearch} searchTerm={searchTerm} />
+      <InputWithLabel
+        id={'search'}
+        type={'text'}
+        onInputChange={handleSearch}
+        value={searchTerm}
+        label={'Search'}
+      />
       <hr />
       <List list={searchedStories} />
       {/* render the list here */}
@@ -86,21 +93,31 @@ const Item = ({ item }) => {
   );
 };
 
-const Search = ({ onSearch, searchTerm }) => {
-  //do  something in between
+// const Search = ({ onSearch, searchTerm }) => {
+//   //do  something in between
 
-  // const handleChange = (event) => {
-  //   setSearchTerm(event.target.value);
+//   // const handleChange = (event) => {
+//   //   setSearchTerm(event.target.value);
 
-  //   //B: is used elsewhere
-  //   onSearch(event);
-  // };
+//   //   //B: is used elsewhere
+//   //   onSearch(event);
+//   // };
+//   return (
+//     <Fragment>
+//       <label htmlFor="search">Search: </label>
+//       <input type="text" id="search" onChange={onSearch} value={searchTerm} />
+//       <p>Searching for: {searchTerm}</p>
+//     </Fragment>
+//   );
+// };
+
+const InputWithLabel = ({ id, label, value, onInputChange, type }) => {
   return (
-    <div>
-      <label htmlFor="search">Search: </label>
-      <input type="text" id="search" onChange={onSearch} value={searchTerm} />
-      <p>Searching for: {searchTerm}</p>
-    </div>
+    <>
+      <label htmlFor={id}>{label}</label>
+      <input type={type} id={id} value={value} onChange={onInputChange} />
+    </>
   );
 };
+
 export default App;
