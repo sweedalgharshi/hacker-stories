@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 
 const App = () => {
   //you can do something in between
-  const stories = [
+  const initialStories = [
     {
       title: 'React',
       url: 'https://reactjs.org/',
@@ -37,6 +37,16 @@ const App = () => {
 
   const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
 
+  const [stories, setStories] = useState(initialStories);
+
+  const handleRemoveStory = (item) => {
+    const newStories = stories.filter(
+      (story) => item.objectID !== story.objectID
+    );
+
+    setStories(newStories);
+  };
+
   // A : a callback function gets sintroduced
   const handleSearch = (event) => {
     //C : but, "calls back" to the place it was called
@@ -64,25 +74,29 @@ const App = () => {
         <strong>Search :</strong>
       </InputWithLabel>
       <hr />
-      <List list={searchedStories} />
+      <List list={searchedStories} onRemoveItem={handleRemoveStory} />
       {/* render the list here */}
     </div>
   );
 };
 
-const List = ({ list }) => {
+const List = ({ list, onRemoveItem }) => {
   // console.log('List Renders');
   return (
     <ul>
       {list.map((item) => (
-        <Item key={item.objectID} item={item} />
+        <Item key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
       ))}
     </ul>
   );
 };
 
-const Item = ({ item }) => {
+const Item = ({ item, onRemoveItem }) => {
   // console.log('Item renders');
+
+  const handleRemoveItem = () => {
+    onRemoveItem(item);
+  };
   return (
     <li>
       <span>
@@ -91,6 +105,11 @@ const Item = ({ item }) => {
       <span>{item.author}</span>
       <span>{item.num_comments}</span>
       <span>{item.points}</span>
+      <span>
+        <button type="button" onClick={handleRemoveItem}>
+          Dismiss
+        </button>
+      </span>
     </li>
   );
 };
