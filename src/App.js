@@ -1,68 +1,135 @@
 import * as React from 'react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useReducer } from 'react';
 // import { Fragment } from 'react';
+
+const ACTIONS = {
+  SET_STORIES: 'set-stories',
+  REMOVE_STORIES: 'remove-stories',
+  STORIES_FETCH_INIT: 'stories-fetch-init',
+  STORIES_FETCH_SUCCESS: 'stories-fetch-success',
+  STORIES_FETCH_FAILURE: 'stories-fetch-failure',
+};
+
+const initialStories = [
+  {
+    title: 'React',
+    url: 'https://reactjs.org/',
+    author: 'Jordan Walke',
+    num_comments: 3,
+    points: 4,
+    objectID: 0,
+  },
+  {
+    title: 'Redux',
+    url: 'https://redux.js.org/',
+    author: 'Dan Abramov, Andrew Clark ',
+    num_comments: 2,
+    points: 5,
+    objectID: 1,
+  },
+];
+
+// const getAsyncStories = () =>
+//   new Promise(
+//     (resolve) =>
+//       setTimeout(() => resolve({ data: { stories: initialStories } })),
+//     2000
+//   );
+
+const useSemiPersistentState = (key, initialState) => {
+  const [value, setValue] = useState(localStorage.getItem(key) || initialState);
+
+  useEffect(() => {
+    localStorage.setItem(key, value);
+  }, [value, key]);
+
+  return [value, setValue];
+};
+
+const storiesReducer = (stories, action) => {
+  switch (action.type) {
+    // case ACTIONS.SET_STORIES:
+    //   return action.payload;
+
+    case ACTIONS.STORIES_FETCH_INIT:
+      return {
+        ...stories,
+        isLoading: true,
+        isError: false,
+      };
+
+    case ACTIONS.STORIES_FETCH_SUCCESS:
+      return {
+        ...stories,
+        isLoading: false,
+        isError: false,
+        data: action.payload,
+      };
+
+    case ACTIONS.STORIES_FETCH_FAILURE:
+      return {
+        ...stories,
+        isLoading: false,
+        isError: true,
+      };
+
+    case ACTIONS.REMOVE_STORIES:
+      return {
+        ...stories,
+        data: stories.data.filter(
+          (story) => action.payload.objectID !== story.objectID
+        ),
+      };
+    default:
+      throw new Error();
+  }
+};
+
+//A
+const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
 const App = () => {
   //you can do something in between
-  const initialStories = [
-    {
-      title: 'React',
-      url: 'https://reactjs.org/',
-      author: 'Jordan Walke',
-      num_comments: 3,
-      points: 4,
-      objectID: 0,
-    },
-    {
-      title: 'Redux',
-      url: 'https://redux.js.org/',
-      author: 'Dan Abramov, Andrew Clark ',
-      num_comments: 2,
-      points: 5,
-      objectID: 1,
-    },
-  ];
-
-  const useSemiPersistentState = (key, initialState) => {
-    const [value, setValue] = useState(
-      localStorage.getItem(key) || initialState
-    );
-
-    useEffect(() => {
-      localStorage.setItem(key, value);
-    }, [value, key]);
-
-    return [value, setValue];
-  };
-
-  const getAsyncStories = () =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        resolve({ data: { stories: initialStories } });
-      }, 2000)
-    );
 
   const [searchTerm, setSearchTerm] = useSemiPersistentState('search', 'React');
-  const [stories, setStories] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
+  // const [stories, setStories] = useState([]);
+  // const [isLoading, setIsLoading] = useState(false);
+  // const [isError, setIsError] = useState(false);
+
+  const [stories, dispatchStories] = useReducer(storiesReducer, {
+    data: [],
+    isLoading: false,
+    isError: false,
+  });
 
   useEffect(() => {
-    setIsLoading(true);
-    getAsyncStories()
+    // setIsLoading(true);
+    dispatchStories({ type: ACTIONS.STORIES_FETCH_INIT });
+
+    fetch(`${API_ENDPOINT}react`) //B
+      .then((response) => response.json()) //C
       .then((result) => {
-        setStories(result.data.stories);
-        setIsLoading(false);
+        dispatchStories({
+          type: ACTIONS.STORIES_FETCH_SUCCESS,
+          payload: result.hits, //D
+        });
       })
-      .catch(() => setIsError(true));
+      .catch(() => dispatchStories({ type: ACTIONS.STORIES_FETCH_FAILURE }));
   }, []);
 
   const handleRemoveStory = (item) => {
-    const newStories = stories.filter(
-      (story) => item.objectID !== story.objectID
-    );
+    dispatchStories({
+      type: ACTIONS.REMOVE_STORIES,
+      payload: item,
+    });
+    // const newStories = stories.filter(
+    //   (story) => item.objectID !== story.objectID
+    // );
 
-    setStories(newStories);
+    // dispatchStories({
+    //   type: 'SET_STORIES',
+    //   payload: newStories,
+    // });
   };
 
   // A : a callback function gets sintroduced
@@ -72,7 +139,7 @@ const App = () => {
     setSearchTerm(event.target.value);
   };
 
-  const searchedStories = stories.filter((story) =>
+  const searchedStories = stories.data.filter((story) =>
     story.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -93,9 +160,9 @@ const App = () => {
       </InputWithLabel>
       <hr />
 
-      {isError && <p>Something went wrong....</p>}
+      {stories.isError && <p>Something went wrong....</p>}
 
-      {isLoading ? (
+      {stories.isLoading ? (
         <p>Loading.....</p>
       ) : (
         <List list={searchedStories} onRemoveItem={handleRemoveStory} />
