@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useRef, useReducer } from 'react';
+import { useState, useEffect, useRef, useReducer, useCallback } from 'react';
 // import { Fragment } from 'react';
 
 const ACTIONS = {
@@ -102,8 +102,7 @@ const App = () => {
     isError: false,
   });
 
-  useEffect(() => {
-    // setIsLoading(true);
+  const handleFetchStories = useCallback(() => {
     if (!searchTerm) return;
     dispatchStories({ type: ACTIONS.STORIES_FETCH_INIT });
 
@@ -117,6 +116,10 @@ const App = () => {
       })
       .catch(() => dispatchStories({ type: ACTIONS.STORIES_FETCH_FAILURE }));
   }, [searchTerm]);
+
+  useEffect(() => {
+    handleFetchStories();
+  }, [handleFetchStories]);
 
   const handleRemoveStory = (item) => {
     dispatchStories({
