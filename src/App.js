@@ -95,6 +95,7 @@ const App = () => {
   // const [stories, setStories] = useState([]);
   // const [isLoading, setIsLoading] = useState(false);
   // const [isError, setIsError] = useState(false);
+  const [url, setUrl] = useState(`${API_ENDPOINT}${searchTerm}`);
 
   const [stories, dispatchStories] = useReducer(storiesReducer, {
     data: [],
@@ -106,7 +107,7 @@ const App = () => {
     if (!searchTerm) return;
     dispatchStories({ type: ACTIONS.STORIES_FETCH_INIT });
 
-    fetch(`${API_ENDPOINT}${searchTerm}`) //B
+    fetch(url) //B
       .then((response) => response.json()) //C
       .then((result) => {
         dispatchStories({
@@ -115,7 +116,7 @@ const App = () => {
         });
       })
       .catch(() => dispatchStories({ type: ACTIONS.STORIES_FETCH_FAILURE }));
-  }, [searchTerm]);
+  }, [url]);
 
   useEffect(() => {
     handleFetchStories();
@@ -137,10 +138,14 @@ const App = () => {
   };
 
   // A : a callback function gets sintroduced
-  const handleSearch = (event) => {
+  const handleSearchInput = (event) => {
     //C : but, "calls back" to the place it was called
     console.log(searchTerm);
     setSearchTerm(event.target.value);
+  };
+
+  const handleSearchSubmit = () => {
+    setUrl(`${API_ENDPOINT}${searchTerm}`);
   };
 
   const searchedStories = stories.data.filter((story) =>
@@ -156,13 +161,17 @@ const App = () => {
       <InputWithLabel
         id={'search'}
         type={'text'}
-        onInputChange={handleSearch}
+        onInputChange={handleSearchInput}
         isFocused
         value={searchTerm}
       >
         <strong>Search :</strong>
       </InputWithLabel>
       <hr />
+
+      <button type="button" disabled={!searchTerm} onClick={handleSearchSubmit}>
+        Submit
+      </button>
 
       {stories.isError && <p>Something went wrong....</p>}
 
