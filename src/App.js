@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect, useRef, useReducer, useCallback } from 'react';
+import axios from 'axios';
 // import { Fragment } from 'react';
 
 const ACTIONS = {
@@ -10,24 +11,27 @@ const ACTIONS = {
   STORIES_FETCH_FAILURE: 'stories-fetch-failure',
 };
 
-const initialStories = [
-  {
-    title: 'React',
-    url: 'https://reactjs.org/',
-    author: 'Jordan Walke',
-    num_comments: 3,
-    points: 4,
-    objectID: 0,
-  },
-  {
-    title: 'Redux',
-    url: 'https://redux.js.org/',
-    author: 'Dan Abramov, Andrew Clark ',
-    num_comments: 2,
-    points: 5,
-    objectID: 1,
-  },
-];
+//A
+const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
+
+// const initialStories = [
+//   {
+//     title: 'React',
+//     url: 'https://reactjs.org/',
+//     author: 'Jordan Walke',
+//     num_comments: 3,
+//     points: 4,
+//     objectID: 0,
+//   },
+//   {
+//     title: 'Redux',
+//     url: 'https://redux.js.org/',
+//     author: 'Dan Abramov, Andrew Clark ',
+//     num_comments: 2,
+//     points: 5,
+//     objectID: 1,
+//   },
+// ];
 
 // const getAsyncStories = () =>
 //   new Promise(
@@ -85,9 +89,6 @@ const storiesReducer = (stories, action) => {
   }
 };
 
-//A
-const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
-
 const App = () => {
   //you can do something in between
 
@@ -103,19 +104,30 @@ const App = () => {
     isError: false,
   });
 
-  const handleFetchStories = useCallback(() => {
-    if (!searchTerm) return;
+  const handleFetchStories = useCallback(async () => {
     dispatchStories({ type: ACTIONS.STORIES_FETCH_INIT });
+    try {
+      const result = await axios.get(url);
+      dispatchStories({
+        type: ACTIONS.STORIES_FETCH_SUCCESS,
+        payload: result.data.hits,
+      });
+    } catch {
+      dispatchStories({
+        type: ACTIONS.STORIES_FETCH_FAILURE,
+      });
+    }
 
-    fetch(url) //B
-      .then((response) => response.json()) //C
-      .then((result) => {
-        dispatchStories({
-          type: ACTIONS.STORIES_FETCH_SUCCESS,
-          payload: result.hits, //D
-        });
-      })
-      .catch(() => dispatchStories({ type: ACTIONS.STORIES_FETCH_FAILURE }));
+    // axios
+    //   .get(url) //B
+    //   // .then((response) => response.json()) //C
+    //   .then((result) => {
+    //     dispatchStories({
+    //       type: ACTIONS.STORIES_FETCH_SUCCESS,
+    //       payload: result.data.hits, //D
+    //     });
+    //   })
+    //   .catch(() => dispatchStories({ type: ACTIONS.STORIES_FETCH_FAILURE }));
   }, [url]);
 
   useEffect(() => {
