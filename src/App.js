@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useEffect, useRef, useReducer, useCallback } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
+import { ReactComponent as Mark } from './mark.svg';
 // import { Fragment } from 'react';
 
 import styles from './App.module.css';
@@ -302,7 +303,7 @@ const Item = ({ item, onRemoveItem }) => {
       <StyledColumn width="10%">{item.points}</StyledColumn>
       <StyledColumn width="10%">
         <StyledButtonSmall type="button" onClick={handleRemoveItem}>
-          Dismiss
+          <Mark width="18px" height="18px" className="svg" />
         </StyledButtonSmall>
       </StyledColumn>
     </StyledItem>
