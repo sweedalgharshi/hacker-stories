@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useReducer, useCallback } from 'react';
 import axios from 'axios';
 // import { Fragment } from 'react';
 
-import './App.css';
+import styles from './App.module.css';
 
 const ACTIONS = {
   SET_STORIES: 'set-stories',
@@ -169,8 +169,8 @@ const App = () => {
 
   // console.log('App Renders');
   return (
-    <div className="container">
-      <h1 className="primary-heading">My Hacker Stories</h1>
+    <div className={styles.container}>
+      <h1 className={styles.primaryHeadline}>My Hacker Stories</h1>
 
       <SearchForm
         searchTerm={searchTerm}
@@ -209,7 +209,7 @@ const Item = ({ item, onRemoveItem }) => {
     onRemoveItem(item);
   };
   return (
-    <li className="item">
+    <li className={styles.item}>
       <span style={{ width: '40%' }}>
         <a href={item.url}>{item.title}</a>
       </span>
@@ -220,7 +220,7 @@ const Item = ({ item, onRemoveItem }) => {
         <button
           type="button"
           onClick={handleRemoveItem}
-          className="button button_small"
+          className={`${styles.button} ${styles.buttonSmall}`}
         >
           Dismiss
         </button>
@@ -265,7 +265,7 @@ const InputWithLabel = ({
 
   return (
     <>
-      <label htmlFor={id} className="label">
+      <label htmlFor={id} className={styles.label}>
         {children}
       </label>
       &nbsp;
@@ -275,7 +275,7 @@ const InputWithLabel = ({
         value={value}
         onChange={onInputChange}
         ref={inputRef}
-        className="input"
+        className={styles.input}
       />
     </>
   );
@@ -283,7 +283,7 @@ const InputWithLabel = ({
 
 const SearchForm = ({ searchTerm, onSearchSubmit, onSearchInput }) => {
   return (
-    <form onSubmit={onSearchSubmit} className="search-form">
+    <form onSubmit={onSearchSubmit} className={styles.searchForm}>
       {/* B*/}
       <InputWithLabel
         id={'search'}
@@ -298,7 +298,7 @@ const SearchForm = ({ searchTerm, onSearchSubmit, onSearchInput }) => {
       <button
         type="submit"
         disabled={!searchTerm}
-        className="button button_large"
+        className={`${styles.button} ${styles.buttonLarge}`}
       >
         Submit
       </button>
